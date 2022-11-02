@@ -1,7 +1,7 @@
 package com.example.ds.EnergyUtilityPlatform.model;
 
 import javax.persistence.*;
-import java.sql.Timestamp;
+import java.time.LocalDate;
 
 @Entity
 public class Consumption {
@@ -9,8 +9,11 @@ public class Consumption {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer consumptionId;
 
-    @Column(name = "timestamp",nullable = false)
-    private Timestamp timestamp;
+    @Column(name = "date",nullable = false)
+    private LocalDate date;
+
+    @Column(name = "hour",nullable = false)
+    private String hour;
 
     @Column(name = "energyConsumption",nullable = false)
     private String energyConsumption;
@@ -18,6 +21,16 @@ public class Consumption {
     @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "deviceId")
     private Device device;
+
+    public Consumption() {
+    }
+
+    public Consumption(LocalDate date, String hour, String energyConsumption, Device device) {
+        this.date = date;
+        this.hour = hour;
+        this.energyConsumption = energyConsumption;
+        this.device = device;
+    }
 
     public Integer getConsumptionId() {
         return consumptionId;
@@ -27,12 +40,20 @@ public class Consumption {
         this.consumptionId = consumptionId;
     }
 
-    public Timestamp getTimestamp() {
-        return timestamp;
+    public LocalDate getDate() {
+        return date;
     }
 
-    public void setTimestamp(Timestamp timestamp) {
-        this.timestamp = timestamp;
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
+
+    public String getHour() {
+        return hour;
+    }
+
+    public void setHour(String hour) {
+        this.hour = hour;
     }
 
     public String getEnergyConsumption() {

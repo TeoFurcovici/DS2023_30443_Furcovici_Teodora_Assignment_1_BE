@@ -1,5 +1,9 @@
 package com.example.ds.EnergyUtilityPlatform.model;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import javax.persistence.*;
 
 @Entity
@@ -17,7 +21,9 @@ public class Device {
     @Column(name="maxHourEnergyConsumption",nullable = false)
     private String maxHourEnergyConsumption;
 
-    @ManyToOne(cascade = CascadeType.MERGE)
+    @ManyToOne(cascade = CascadeType.MERGE,fetch = FetchType.EAGER)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name="userId")
     private  RegularUser regularUser;
 
     public Device(String description, String address, String maxHourEnergyConsumption) {

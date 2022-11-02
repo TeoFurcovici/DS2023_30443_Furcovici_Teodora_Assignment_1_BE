@@ -1,11 +1,9 @@
 package com.example.ds.EnergyUtilityPlatform.controller;
 
-import com.example.ds.EnergyUtilityPlatform.model.Account;
-import com.example.ds.EnergyUtilityPlatform.model.Admin;
-import com.example.ds.EnergyUtilityPlatform.model.Device;
-import com.example.ds.EnergyUtilityPlatform.model.RegularUser;
+import com.example.ds.EnergyUtilityPlatform.model.*;
 import com.example.ds.EnergyUtilityPlatform.model.dto.DTOAccount;
 import com.example.ds.EnergyUtilityPlatform.model.dto.DTOAccountForUpdate;
+import com.example.ds.EnergyUtilityPlatform.model.dto.DTOConsumption;
 import com.example.ds.EnergyUtilityPlatform.model.dto.DTODevice;
 import com.example.ds.EnergyUtilityPlatform.service.*;
 import org.slf4j.Logger;
@@ -16,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @RestController
@@ -32,6 +32,9 @@ public class AdminController {
 
     @Autowired
     private RegularUserService regularUserService;
+
+    @Autowired
+    private ConsumptionService consumptionService;
 
     @PostMapping(path = "/addAdmin")
     public @ResponseBody String addNewAdmin(@RequestBody DTOAccount dtoUser) {
@@ -156,8 +159,13 @@ public class AdminController {
     @DeleteMapping(path = "/deleteDevice/{address}")
     public @ResponseBody void deleteDevice(@PathVariable String address) {
         Optional<Device> device = deviceService.findByAddress(address);
+        if(device.get().getRegularUser().getUserId()!=null)
+        {
+            device.get().setRegularUser(null);
+        }
         deviceService.deleteByDeviceId(device.get().getDeviceId());
     }
+
 
     @GetMapping(path = "/getAllDevices")
     public List<Device> getAllDevices() {
@@ -178,5 +186,29 @@ public class AdminController {
         }
 
         return  listOfAllRegularUsers;
+    }
+
+    @PostMapping(path = "/addConsumption")
+    public @ResponseBody
+    String addConsumption(@RequestBody DTOConsumption dtoConsumption) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d/MM/yyyy");
+        LocalDate date = LocalDate.parse(dtoConsumption.getDate(), formatter);
+        Iterable<Device> allDevices=deviceService.findAllDevices();
+        List<Integer> listOfDeviceIds=new ArrayList<>();
+        for (Device currentDevice:allDevices) {
+            listOfDeviceIds.add(currentDevice.getDeviceId());
+        }
+        Random rand = new Random();
+        int randomDeviceId = listOfDeviceIds.get(rand.nextInt(listOfDeviceIds.size()));
+        Optional<Device> device= deviceService.findById(randomDeviceId);
+        Consumption consumption = new Consumption(date,dtoConsumption.getHour(),dtoConsumption.getEnergyConsumption(),device.get());
+        if (consumptionService.findByDateAndHour(date,dtoConsumption.getHour())==null) {
+            consumptionService.save(consumption);
+            LOGGER.info("Consumption added at  " + consumption.getDate() + " was successfully added!");
+            return "Saved consumption";
+        }
+        LOGGER.warn("Consumption added at  " + consumption.getDate() + " already exists!");
+
+        return "Already exists this consumption";
     }
 }

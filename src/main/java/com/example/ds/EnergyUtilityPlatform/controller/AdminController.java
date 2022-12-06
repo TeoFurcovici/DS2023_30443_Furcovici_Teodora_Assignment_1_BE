@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -102,6 +103,7 @@ public class AdminController {
         return ResponseEntity.status(HttpStatus.OK).body(accountUser.orElse(new Account()));
     }
 
+
     @Transactional
     @DeleteMapping(path = "/deleteAdmin/{username}")
     public @ResponseBody void deleteAdmin(@PathVariable String username) {
@@ -110,6 +112,7 @@ public class AdminController {
         accountService.deleteByAccountId(accountAdmin.get().getAccountId());
     }
 
+
     @Transactional
     @DeleteMapping(path = "/deleteUser/{username}")
     public @ResponseBody void deleteUser(@PathVariable String username) {
@@ -117,6 +120,7 @@ public class AdminController {
         regularUserService.deleteByUserId(accountAdmin.get().getUser().getUserId());
         accountService.deleteByAccountId(accountAdmin.get().getAccountId());
     }
+
 
     @PostMapping(path = "/addDevice")
     public @ResponseBody
@@ -132,6 +136,8 @@ public class AdminController {
         return "Already exists device";
     }
 
+
+    @CrossOrigin(origins = "http://localhost:8080/energyUtilityPlatform")
     @GetMapping(path = "/findDeviceByAddress/{address}/{description}")
     public ResponseEntity<Device> findDeviceByAddress(@PathVariable String address,@PathVariable String description) {
         Optional<Device> device = deviceService.findByAddressAndDescription(address,description);
@@ -139,6 +145,7 @@ public class AdminController {
 
         return ResponseEntity.status(HttpStatus.OK).body(device.orElse(new Device()));
     }
+
 
     @PutMapping(path = "/updateDevice/{address}/{maxEnergy}")
     public @ResponseBody ResponseEntity<Device> updateDevice(@RequestBody DTODevice dtoDevice, @PathVariable String address,@PathVariable String maxEnergy) {
@@ -155,6 +162,7 @@ public class AdminController {
 
         return ResponseEntity.status(HttpStatus.OK).body(device.orElse(new Device()));
     }
+
     @Transactional
     @DeleteMapping(path = "/deleteDevice/{address}")
     public @ResponseBody void deleteDevice(@PathVariable String address) {
@@ -167,6 +175,7 @@ public class AdminController {
     }
 
 
+
     @GetMapping(path = "/getAllDevices")
     public List<Device> getAllDevices() {
         Iterable<Device> allDevices=deviceService.findAllDevices();
@@ -177,6 +186,7 @@ public class AdminController {
 
         return  allDeviceForSpecificUser;
     }
+
     @GetMapping(path = "/getAllRegularUsers")
     public List<RegularUser> getAllRegularUsers() {
         Iterable<RegularUser> allUsers=regularUserService.findAllUsers();
@@ -187,6 +197,7 @@ public class AdminController {
 
         return  listOfAllRegularUsers;
     }
+
 
     @PostMapping(path = "/addConsumption")
     public @ResponseBody
@@ -201,7 +212,7 @@ public class AdminController {
         Random rand = new Random();
         int randomDeviceId = listOfDeviceIds.get(rand.nextInt(listOfDeviceIds.size()));
         Optional<Device> device= deviceService.findById(randomDeviceId);
-        Consumption consumption = new Consumption(date,dtoConsumption.getHour(),dtoConsumption.getEnergyConsumption(),device.get());
+        Consumption consumption = new Consumption(dtoConsumption.getDate(),dtoConsumption.getHour(),dtoConsumption.getEnergyConsumption(),device.get());
         if (consumptionService.findByDateAndHour(date,dtoConsumption.getHour())==null) {
             consumptionService.save(consumption);
             LOGGER.info("Consumption added at  " + consumption.getDate() + " was successfully added!");

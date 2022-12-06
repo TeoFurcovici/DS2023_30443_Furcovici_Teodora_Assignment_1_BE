@@ -14,17 +14,31 @@ services:
       - "3307:3306"
     container_name: demo-db
 
+  rabbitmq:
+    image: rabbitmq
+    restart: always
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
   demo-be:
     image: be
     restart: always
     ports:
       - "8080:8080"
     environment:
-      #- DB_IP=172.22.0.2
+      - SPRING_RABBITMQ_HOST=rabbitmq
       - DB_IP=demo-db
-      - RABBIT_IP=demo-rabbit
+      - RABBIT_IP=rabbitmq
       - DB_PORT=3307
       - DB_USER=root
       - DB_PASSWORD=root
       - DB_DBNAME=city_db
+    depends_on: #define dependencies of this app
+      - rabbitmq
+      - demo-db
 

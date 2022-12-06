@@ -1,6 +1,7 @@
 package com.example.ds.EnergyUtilityPlatform.model;
 
 import javax.persistence.*;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 
 @Entity
@@ -10,7 +11,7 @@ public class Consumption {
     private Integer consumptionId;
 
     @Column(name = "date",nullable = false)
-    private LocalDate date;
+    private String date;
 
     @Column(name = "hour",nullable = false)
     private String hour;
@@ -25,7 +26,7 @@ public class Consumption {
     public Consumption() {
     }
 
-    public Consumption(LocalDate date, String hour, String energyConsumption, Device device) {
+    public Consumption(String date, String hour, String energyConsumption, Device device) {
         this.date = date;
         this.hour = hour;
         this.energyConsumption = energyConsumption;
@@ -40,11 +41,11 @@ public class Consumption {
         this.consumptionId = consumptionId;
     }
 
-    public LocalDate getDate() {
+    public String getDate() {
         return date;
     }
 
-    public void setDate(LocalDate date) {
+    public void setDate(String date) {
         this.date = date;
     }
 

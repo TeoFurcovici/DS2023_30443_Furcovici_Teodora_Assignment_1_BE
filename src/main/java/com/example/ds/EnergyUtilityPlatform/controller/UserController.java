@@ -4,19 +4,19 @@ import com.example.ds.EnergyUtilityPlatform.model.Account;
 import com.example.ds.EnergyUtilityPlatform.model.Device;
 import com.example.ds.EnergyUtilityPlatform.model.RegularUser;
 import com.example.ds.EnergyUtilityPlatform.model.dto.DTOAccount;
-import com.example.ds.EnergyUtilityPlatform.service.AccountService;
-import com.example.ds.EnergyUtilityPlatform.service.CipherDecrypt;
-import com.example.ds.EnergyUtilityPlatform.service.DeviceService;
-import com.example.ds.EnergyUtilityPlatform.service.RegularUserService;
+import com.example.ds.EnergyUtilityPlatform.model.dto.TextMessageDTO;
+import com.example.ds.EnergyUtilityPlatform.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.expression.spel.ast.OpInc;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(path = "/demo")
@@ -30,6 +30,10 @@ public class UserController {
 
     @Autowired
     private DeviceService deviceService;
+
+    @Autowired
+    private  MessageConsumer messageConsumer;
+
 
     @PostMapping(path = "/addUser")
     public @ResponseBody String addNewUser(@RequestBody DTOAccount dtoUser) {
@@ -53,9 +57,11 @@ public class UserController {
         return "Already exists user";
     }
 
+
     @GetMapping(path = "/findUserByUsername/{username}")
-    public ResponseEntity<Account> findUserByUsername(@PathVariable String username) {
+    public ResponseEntity<Account> findUserByUsername(@PathVariable String username) throws Exception {
         Optional<Account> accountUser = accountService.findByUsername(username);
+
         CipherDecrypt cipherDecrypt = new CipherDecrypt();
         String decryptPass = cipherDecrypt.decrypt(accountUser.get().getPassword(), secretKey);
         if (decryptPass != null) {
@@ -63,9 +69,10 @@ public class UserController {
         }
         accountUser.get().setPassword(decryptPass);
         LOGGER.info("User " + accountUser.get().getEmail() + " was found!!");
-
+        messageConsumer.consumeMessages();
         return ResponseEntity.status(HttpStatus.OK).body(accountUser.orElse(new Account()));
     }
+
 
     @GetMapping(path = "/getAllDevicesForUser/{username}")
     public List<Device> getAllDevicesByUsername(@PathVariable String username) {
@@ -82,6 +89,7 @@ public class UserController {
 
         return  allDeviceForSpecificUser;
     }
+
 
     @GetMapping(path = "/getAllAvailableDevices")
     public List<Device> getAllAvailableDevices() {

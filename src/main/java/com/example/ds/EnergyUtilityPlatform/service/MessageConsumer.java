@@ -22,7 +22,7 @@ import java.util.Optional;
 
 @Component
 public class MessageConsumer {
-    private final static String QUEUE_NAME = "dsQueue1";
+    private final static String QUEUE_NAME = "dsQ2";
     private JSONObject json;
 
     private int counter=0;
@@ -64,8 +64,8 @@ public class MessageConsumer {
                 Consumption consumption = new Consumption(deviceTimestamp, "12:45", deviceConsumption.toString(), currentDevice.get());
                 counter++;
                 totalHourConsumption+=deviceConsumption;
-                if(counter>6){
-                    counter=0;
+                //if(counter>6){
+                   // counter=0;
                     if(totalHourConsumption>Double.parseDouble(currentDevice.get().getMaxHourEnergyConsumption()) && currentDevice.get().getRegularUser()!=null) {
                         totalHourConsumption = 0.0;
                         template.convertAndSend("/topic/message",
@@ -77,7 +77,7 @@ public class MessageConsumer {
                         System.out.println("nu are user");
                     }
 
-                }
+                //}
 
             } catch (ParseException e) {
                 throw new RuntimeException(e);

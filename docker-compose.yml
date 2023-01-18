@@ -15,7 +15,7 @@ services:
     container_name: demo-db
 
   rabbitmq:
-    image: rabbitmq
+    image: rabbitmq:management
     restart: always
     environment:
       - RABBITMQ_DEFAULT_USER=guest

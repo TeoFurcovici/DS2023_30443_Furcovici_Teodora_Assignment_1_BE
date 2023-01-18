@@ -18,7 +18,7 @@ import java.util.concurrent.TimeoutException;
 @Configuration
 @EnableAutoConfiguration
 public class RabbitConfig {
-    public static final String QUEUE = "dsQueue1";
+    public static final String QUEUE = "dsQ2";
     public static final String EXCHANGE = "exchange";
     public static final String ROUTING_KEY = "routingKey";
 
